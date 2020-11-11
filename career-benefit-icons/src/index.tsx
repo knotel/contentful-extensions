@@ -7,6 +7,7 @@ import {
   Option,
   Typography,
   Button,
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import { init, EditorExtensionSDK } from 'contentful-ui-extensions-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
@@ -25,7 +26,7 @@ interface BenefitIcon {
 interface IconEditorProps {
   benefitIcon: BenefitIcon
   index: number
-  updateIcon(benefitIcon: BenefitIcon, index: number): void
+  updateIcon(benefitIcon: BenefitIcon | null, index: number): void
 }
 
 function IconEditor({benefitIcon, index, updateIcon}: IconEditorProps): JSX.Element {
@@ -51,7 +52,7 @@ function IconEditor({benefitIcon, index, updateIcon}: IconEditorProps): JSX.Elem
       <Option value="train">train</Option>
       <Option value="heartbeat">heartbeat</Option>
     </SelectField>
-    <Button>Remove</Button>
+    <TextLink onClick={() => updateIcon(null, index)}>Remove</TextLink>
   </Typography>
   )
 }
@@ -65,7 +66,11 @@ function App({ sdk }: AppProps): JSX.Element {
   }, [])
 
   const updateIcon = React.useCallback((benefitIcon: BenefitIcon, index: number) => {
-    icons.current[index] = benefitIcon
+    if (benefitIcon !== null) {
+      icons.current[index] = benefitIcon
+    } else {
+      icons.current = [...icons.current.slice(0, index), ...icons.current.slice(index + 1)]
+    }
     sdk.entry.fields.benefitIcons.setValue(icons.current)
   }, [])
 
@@ -74,10 +79,10 @@ function App({ sdk }: AppProps): JSX.Element {
       {icons.current.map((benefitIcon, index) => (
         <IconEditor key={`icon-${index}`} benefitIcon={benefitIcon} index={index} updateIcon={updateIcon} />
       ))}
-      <Button onClick={() => {
+      <TextLink onClick={() => {
         icons.current = [...icons.current, {}]
         setForceUpdate(new Date())
-      }}>Add Icon</Button>
+      }}>Add icon and label</TextLink>
     </div>
   )
 }
